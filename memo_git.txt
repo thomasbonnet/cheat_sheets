@@ -1,0 +1,31 @@
+#config
+git config --list
+git config --global user.name
+
+#creation d'une branch avec deplacement vers:
+git checkout -b ma-branche
+
+#lister les branch et savoir ou l'on se trouve:
+git branch
+
+#changer de branch
+git checkout ma-branch
+
+
+#stash
+#sauvegarde stash et retour à la version de l'index
+git stash
+
+#list des stash
+git list
+
+#pour voir le contenu d'un stash
+git stash show stash@{1}
+
+pour apppliquer le contenu d'un stash
+git stash apply stash@{1}
+
+#pour virer un stash
+git stash drop
+
+#pour appliquer et virer en meme temp git stash pop
