@@ -22,10 +22,23 @@ git list
 #pour voir le contenu d'un stash
 git stash show stash@{1}
 
-pour apppliquer le contenu d'un stash
+#pour apppliquer le contenu d'un stash
+####
+#be carefeull ma pull: les stash sont partages entre les branch
+#il ne faut pas l'appliquer sur une branch differentes de la sauvegarde
 git stash apply stash@{1}
 
 #pour virer un stash
 git stash drop
 
 #pour appliquer et virer en meme temp git stash pop
+
+
+#Remote
+#pour voir la liste des remote:
+git remote -v
+#pour changer le remote par exemple pour passer de https a ssh:
+git remote set-url origin git@github.com:thomasbonnet/cheat_sheets.git
+
+#j'ai fait de la merde sur un fichier : revenir au dernier commit
+git checkout -- filename
