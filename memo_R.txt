@@ -1,0 +1,64 @@
+#run a script .R
+source('script.R')
+
+
+## Vectors
+numeric_vector <- c(1, 10, 49)
+character_vector <- c("a", "b", "c")
+boolean_vector <- c(TRUE,FALSE,TRUE)
+
+poker_vector <- c(140, -50, 20, -120, 240)
+names(poker_vector) <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+# Define a new variable based on a selection
+poker_sel <- poker_vector[1]
+poker_midweek <- poker_vector[c(2,3,4)]
+
+## matrices
+new_hope <- c(460.998, 314.4)
+empire_strikes <- c(290.475, 247.900)
+return_jedi <- c(309.306, 165.8)
+
+# Create box_office
+box_office <- c(new_hope,empire_strikes,return_jedi)
+# Construct star_wars_matrix
+star_wars_matrix <- matrix(box_office,nrow=3,byrow=TRUE)
+
+colnames(star_wars_matrix) <- region
+rownames(star_wars_matrix) <- titles
+worldwide_vector <- rowSums(star_wars_matrix)
+
+#selection
+us_visitors <- visitors[,1]
+
+## factors
+temperature_vector <- c("High", "Low", "High","Low", "Medium")
+factor_temperature_vector <- factor(temperature_vector, order = TRUE, levels = c("Low", "Medium", "High"))
+levels(factor_survey_vector) <- c("Female", "Male")
+
+## dataframes
+# Definition of vectors
+name <- c("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune")
+type <- c("Terrestrial planet", "Terrestrial planet", "Terrestrial planet", 
+          "Terrestrial planet", "Gas giant", "Gas giant", "Gas giant", "Gas giant")
+diameter <- c(0.382, 0.949, 1, 0.532, 11.209, 9.449, 4.007, 3.883)
+rotation <- c(58.64, -243.02, 1, 1.03, 0.41, 0.43, -0.72, 0.67)
+rings <- c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE)
+
+# Create a data frame from the vectors
+planets_df <- data.frame(name,type,diameter,rotation,rings)
+
+#selection
+planets_df[1,3]
+planets_df[4,]
+planets_df[1:5,"diameter"]
+
+subset(planets_df,diameter<1)
+
+#sorting
+positions <-  order(planets_df$diameter)
+planets_df[positions,]
+
+
+## list
+my_list <- list(my_vector,my_matrix,my_df)

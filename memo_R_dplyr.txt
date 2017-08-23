@@ -1,0 +1,94 @@
+# Load the dplyr package
+library(dplyr)
+
+# Load the hflights package
+library(hflights)
+
+# Call both head() and summary() on hflights
+head(hflights)
+summary(hflights)
+
+# Convert the hflights data.frame into a hflights tbl
+hflights <- tbl_df(hflights)
+
+Both the dplyr and hflights packages are loaded into workspace
+lut <- c("AA" = "American", "AS" = "Alaska", "B6" = "JetBlue", "CO" = "Continental", 
+         "DL" = "Delta", "OO" = "SkyWest", "UA" = "United", "US" = "US_Airways", 
+         "WN" = "Southwest", "EV" = "Atlantic_Southeast", "F9" = "Frontier", 
+         "FL" = "AirTran", "MQ" = "American_Eagle", "XE" = "ExpressJet", "YV" = "Mesa")
+
+# Add the Carrier column to hflights
+hflights$Carrier <- lut[hflights$UniqueCarrier]
+
+# Glimpse at hflights
+glimpse(hflights)
+
+
+
+#    select(), which returns a subset of the columns,
+#    filter(), that is able to return a subset of the rows,
+#    arrange(), that reorders the rows according to single or multiple variables,
+#    mutate(), used to add columns from existing data,
+#    summarise(), which reduces each group to a single row by calculating aggregate measures.
+
+
+# Print out a tbl as described in the second instruction, using both helper functions and variable names
+select(hflights,one_of(c("UniqueCarrier", "FlightNum", "TailNum", "Cancelled", "CancellationCode")))
+
+# Print out a tbl as described in the third instruction, using only helper functions.
+select(hflights,ends_with("Time"),ends_with("Delay"))
+
+# Add a second variable loss_ratio to the dataset: m1
+m1 <- mutate(hflights, loss = ArrDelay - DepDelay, loss_ratio = loss/DepDelay )
+
+
+# All flights that traveled 3000 miles or more
+filter(hflights,Distance>=3000)
+
+# All flights flown by one of JetBlue, Southwest, or Delta
+filter(hflights,UniqueCarrier == 'JetBlue' | UniqueCarrier == 'Southwest' | UniqueCarrier == 'Delta')
+
+
+# Arrange dtc according to carrier and departure delays
+arrange(dtc,UniqueCarrier,DepDelay)
+
+# Print out a summary with variables min_dist and max_dist
+summarise(hflights,min_dist=min(Distance),max_dist=max(Distance))
+
+# Print out a summary with variable max_div
+summarise(filter(hflights,Diverted==1),max_div=max(Distance))
+
+# Remove rows that have NA ArrDelay: temp1
+temp1 <- filter(hflights,!is.na(ArrDelay))
+
+# Generate summary about ArrDelay column of temp1
+summarise(temp1, earliest=min(ArrDelay),
+                 average=mean(ArrDelay),
+                 latest=max(ArrDelay),
+                 sd=sd(ArrDelay))
+
+#    first(x) - The first element of vector x.
+#    last(x) - The last element of vector x.
+#    nth(x, n) - The nth element of vector x.
+#    n() - The number of rows in the data.frame or group of observations that summarise() describes.
+#    n_distinct(x) - The number of unique values in vector x.
+
+
+#the pipe
+# Finish the command with a filter() and summarise() call
+hflights %>%
+  mutate(RealTime = ActualElapsedTime + 100, mph = Distance / RealTime * 60) %>%
+  filter(mph<105 | Cancelled==1 | Diverted == 1) %>%
+  summarise(n_non=n(),
+            n_dest=n_distinct(Dest),
+            min_dist=min(Distance),
+            max_dist=max(Distance)
+  )
+
+
+# Make an ordered per-carrier summary of hflights
+hflights %>%
+  group_by(UniqueCarrier) %>%
+  summarise(p_canc = mean(Cancelled==1)*100,
+            avg_delay = mean(ArrDelay,na.rm=TRUE)) %>%
+  arrange(avg_delay, p_canc)
