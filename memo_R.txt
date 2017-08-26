@@ -62,3 +62,66 @@ planets_df[positions,]
 
 ## list
 my_list <- list(my_vector,my_matrix,my_df)
+
+
+## recall : in R bins are called breaks!!!! (just to bin balls)
+hist_2 <- hist(loan_data$loan_amnt, breaks = 200, xlab = "Loan amount", 
+               main = "Histogram of the loan amount")
+hist_2$breaks
+
+
+## Cross table -- Categorial variables
+library(gmodels)
+CrossTable(x=loan_data$grade,y=loan_data$loan_status,prop.r=TRUE,prop.c=FALSE,prop.t=FALSE,prop.chisq=FALSE)
+
+
+## NA treatment
+# Get indices of missing interest rates: na_index
+na_index <- which(is.na(loan_data$int_rate))
+# Remove observations with missing interest rates: loan_data_delrow_na
+loan_data_delrow_na <- loan_data[-na_index, ]
+
+# Delete interest rate column from loan_data_delcol_na
+loan_data_delcol_na$int_rate <- NULL
+
+median_ir <- median(loan_data$int_rate,na.rm=TRUE)
+# Replace missing interest rates with median
+loan_data_replace$int_rate[na_index] <- median_ir
+
+
+##coarse classification
+# Make the necessary replacements in the coarse classification example below 
+loan_data$ir_cat <- rep(NA, length(loan_data$int_rate))
+loan_data$ir_cat[which(loan_data$int_rate <= 8)] <- "0-8"
+loan_data$ir_cat[which(loan_data$int_rate > 8 & loan_data$int_rate <= 11)] <- "8-11"
+loan_data$ir_cat[which(loan_data$int_rate > 11 & loan_data$int_rate <= 13.5)] <- "11-13.5"
+loan_data$ir_cat[which(loan_data$int_rate > 13.5)] <- "13.5+"
+loan_data$ir_cat[which(is.na(loan_data$int_rate))] <- "Missing"
+loan_data$ir_cat <- as.factor(loan_data$ir_cat)
+
+
+## split test/train
+# Set seed of 567
+set.seed(567)
+# Store row numbers for training set: index_train
+index_train <- sample(c(1:nrow(loan_data)), 2 / 3 * nrow(loan_data))
+# Create training set: training_set
+training_set <- loan_data[index_train, ]
+# Create test set: test_set
+test_set <- loan_data[-index_train, ]
+
+
+#logistic regression
+log_model_cat <- glm(loan_status ~ ir_cat, family = "binomial", data = training_set)
+log_model_multi <- glm(loan_status~age+ir_cat+grade+loan_amnt+annual_inc,family="binomial",training_set)
+# Obtain significance levels using summary()
+summary(log_model_multi)
+#with all  the varauables
+log_model_small <- glm(loan_status ~ ., family = "binomial", data = training_set)
+#predict
+predictions_all_full <- predict(log_model_full,newdata=test_set,type="response")
+pred_cutoff_15 <- ifelse(predictions_all_full>0.15,1,0)
+# Construct a confusion matrix
+table(test_set$loan_status,pred_cutoff_15)
+#accuracy
+acc_logit <- sum(diag(tab_class_logit)) / nrow(test_set)

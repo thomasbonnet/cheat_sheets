@@ -1,0 +1,77 @@
+##preprocessing
+
+### by features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+StandardScaler() :  standardizes features by removing the mean and scaling to unit variance
+
+### by samples
+Normalizer() rescales each sample
+
+### pipeline
+from sklearn.pipeline import make_pipeline
+pipeline = make_pipeline(scaler,kmeans)
+
+
+
+#cluster KMean
+from sklearn.cluster import KMeans
+kmeans = KMeans(n_clusters=4)
+model.fit(samples)
+
+## centroid and inertia (spread out) of the clusters
+model.cluster_centers_
+model.inertia_
+
+# Cross tab of the pred labels with the true labels
+df = pd.DataFrame({'labels': labels, 'varieties': varieties})
+ct = pd.crosstab(df['labels'],df['varieties'])
+
+
+#agglomerative hierarchical clustering
+from scipy.cluster.hierarchy import linkage, dendrogram
+
+mergings = linkage(samples,method='single') #distance of closest points in each cluster
+mergings = linkage(samples,method='complete') #distance of furthest points in each cluster
+
+# Plot the dendrogram
+dendrogram(mergings,
+            labels=country_names,
+            leaf_rotation=90,
+            leaf_font_size=6)
+
+# By default one cluster is created by sample, reduce the number of clusters by distance
+from scipy.cluster.hierarchy import fcluster
+# Use fcluster to extract labels: labels
+labels = fcluster(mergings,6,criterion='distance')
+
+
+## TSNE
+# Import TSNE
+from sklearn.manifold import TSNE
+
+model = TSNE(learning_rate=200) ## typycal values for lr is between 50 and 200
+tsne_features = model.fit_transform(samples)
+xs = tsne_features[:,0]
+ys = tsne_features[:,1]
+plt.scatter(xs,ys,c=variety_numbers,alpha=0.5)
+
+# Annotate the points
+for x, y, company in zip(xs, ys, companies):
+    plt.annotate(company, (x, y), fontsize=5, alpha=0.75)
+plt.show()
+
+## PCA
+from sklearn.decomposition import PCA
+model = PCA()
+pca = PCA(n_components=2)
+model.fit(grains)
+# Get the mean of the grain samples: mean
+mean = model.mean_
+# Get the first principal component: first_pc
+first_pc = model.components_[0,:]
+# Plot first_pc as an arrow, starting at mean
+plt.arrow(mean[0], mean[1], first_pc[0], first_pc[1], color='red', width=0.01)
+#plot the variances of the pca, to visualize the number of components to keep
+features = range(pca.n_components_)
+plt.bar(features, pca.explained_variance_)

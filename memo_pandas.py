@@ -27,3 +27,14 @@ data.columns = ['up_orders', 'up_first_order', 'up_last_order', 'up_mean_cart_po
 
 #autre facon de se debarasser d'un multiIndex : passer l'index de ligne de dernier niveau en index de colonne
 df.unstack()
+
+
+##melt, pivot
+airquality_melt = pd.melt(airquality, id_vars=['Month', 'Day'], var_name='measurement', value_name='reading')
+airquality_pivot = airquality_dup.pivot_table(index=['Month', 'Day'], columns='measurement', values='reading', aggfunc=np.mean)
+
+
+## a trick to compute a value over two rows : very faster than groupby or apply
+df = df.sort_values(by=['name','timestamp'])
+df['time_diff'] = df['timestamp'].diff()
+df.loc[df.name != df.name.shift(), 'time_diff'] = None
