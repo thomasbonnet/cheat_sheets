@@ -84,6 +84,8 @@ loan_data_delrow_na <- loan_data[-na_index, ]
 # Delete interest rate column from loan_data_delcol_na
 loan_data_delcol_na$int_rate <- NULL
 
+
+
 median_ir <- median(loan_data$int_rate,na.rm=TRUE)
 # Replace missing interest rates with median
 loan_data_replace$int_rate[na_index] <- median_ir
@@ -125,3 +127,57 @@ pred_cutoff_15 <- ifelse(predictions_all_full>0.15,1,0)
 table(test_set$loan_status,pred_cutoff_15)
 #accuracy
 acc_logit <- sum(diag(tab_class_logit)) / nrow(test_set)
+
+## ROC and AUC
+library(pROC)
+# Create a ROC curve
+ROC <- roc(donors$donated, donors$donation_prob)
+# Plot the ROC curve
+plot(ROC, col = "blue")
+# Calculate the area under the curve (AUC)
+auc(ROC)
+
+# dummy variable
+# Convert the wealth rating to a factor
+donors$wealth_rating <- factor(donors$wealth_rating, levels = c(0,1,2,3), labels = c('Unknown','Low','Medium','High'))
+# Use relevel() to change reference category
+donors$wealth_rating <- relevel(donors$wealth_rating, ref = 'Medium')
+
+
+## Step regression : fit models with more and more features to see which are relevant
+# Specify a null model with no predictors
+null_model <- glm(donated~1, data = donors, family = "binomial")
+# Specify the full model using all of the potential predictors
+full_model <- glm(donated~., data = donors, family = "binomial")
+# Use a forward stepwise algorithm to build a parsimonious model
+step_model <- step(null_model, scope = list(lower = null_model, upper = full_model), direction = "forward")
+# Estimate the stepwise donation probability
+step_prob <- predict(step_model,newdata=donors,type="response")
+# Impute missing age values with mean(age)
+donors$imputed_age <- ifelse(is.na(donors$age),61.65,donors$age)
+
+## knn
+library(class)
+# Use the prob parameter to get the proportion of votes for the winning class
+sign_pred <- knn(train=signs[-1],test=signs_test[-1],cl=signs$sign_type,k=7,prob=TRUE)
+# Get the "prob" attribute from the predicted classes
+sign_prob <- attr(sign_pred, "prob")
+# Examine the first several predictions
+head(sign_pred)
+# Examine the proportion of votes for the winning class
+head(sign_prob)
+# Create a confusion matrix of the actual versus predicted values
+signs_actual <- test_signs$sign_type
+table(signs_pred, signs_actual)
+# Compute the accuracy
+mean(signs_pred == signs_actual)
+
+## naive Bayes
+library(naivebayes)
+# Build a NB model of location
+locmodel <- naive_bayes(location ~ daytype + hourtype, data=locations)
+
+# Predict Brett's location on a weekday afternoon
+predict(locmodel,weekday_afternoon)
+predict(locmodel, newdata=weekend_afternoon,type='prob')
+
